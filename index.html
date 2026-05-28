@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CÔNG CỤ SÀNG LỌC NHẬP ICU - BỆNH VIỆN LÃO KHOA TRUNG ƯƠNG</title>
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --secondary-color: #34495e;
+            --exclusion-color: #c0392b;
+            --inclusion-color: #2980b9;
+            --text-color: #2c3e50;
+            --border-color: #cbd5e1;
+            
+            /* Màu phân cấp ưu tiên */
+            --very-high-color: #2980b9;
+            --high-color: #e67e22;
+            --low-color: #d35400;
+            --very-low-color: #c0392b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text-color);
+            line-height: 1.5;
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f4f8;
+        }
+
+        .backdrop-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('benh-vien-lao-khoa-trung-uong-luon-la-diem-tua-an-vui-manh-khoe-cua-nguoi-benh-cao-tuoi_649be6b1ecb5b.jpg');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            filter: blur(5px);
+            z-index: -2;
+        }
+
+        .backdrop-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(240, 244, 248, 0.88), rgba(200, 214, 229, 0.92));
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(13, 71, 161, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            z-index: 1;
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .hospital-name {
+            color: #1e3a8a;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 20px;
+            font-weight: 800;
+            margin: 5px 0;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            color: #e67e22;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* Tiến trình phân loại */
+        .triage-section {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid;
+        }
+
+        .title-exclusion { color: var(--exclusion-color); border-color: var(--exclusion-color); }
+        .title-inclusion { color: var(--inclusion-color); border-color: var(--inclusion-color); }
+        .title-prioritise { color: var(--primary-color); border-color: var(--primary-color); }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14.5px;
+            background: #fafafa;
+        }
+
+        .checkbox-label:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .checkbox-label input {
+            margin-top: 4px;
+            transform: scale(1.1);
+        }
+
+        .select-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .select-group { grid-template-columns: 1fr; }
+        }
+
+        .select-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .select-box label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .select-box select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            background-color: white;
+            outline: none;
+        }
+
+        .select-box select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2980b9, #0d47a1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.2);
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(13, 71, 161, 0.3);
+        }
+
+        /* Khung hiển thị kết quả phân loại */
+        #result-card {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 8px solid;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .result-text-main {
+            font-size: 22px;
+            font-weight: 800;
+            margin: 0 0 15px 0;
+        }
+
+        .result-block {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
+        }
+
+        .result-block h4 {
+            margin: 0 0 6px 0;
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #1e293b;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+        }
+
+        .result-block p {
+            margin: 0;
+            font-size: 14px;
+            text-align: justify;
+            color: #334155;
+        }
+
+        /* Định dạng màu sắc động cho kết quả */
+        .res-exclusion { background-color: #fef2f2; border-color: var(--exclusion-color); color: #991b1b; }
+        .res-no-inclusion { background-color: #fffbeb; border-color: #d97706; color: #92400e; }
+        
+        .res-prio-very-high { background-color: #f0f9ff; border-color: var(--very-high-color); color: #0c4a6e; }
+        .res-prio-high { background-color: #fff7ed; border-color: var(--high-color); color: #7c2d12; }
+        .res-prio-low { background-color: #fff7ed; border-color: var(--low-color); color: #7c2d12; }
+        .res-prio-very-low { background-color: #fff5f5; border-color: var(--very-low-color); color: #7f1d1d; }
+
+        .badge-exclusion { background-color: var(--exclusion-color); }
+        .badge-no-inclusion { background-color: #d97706; }
+        .badge-vhigh { background-color: var(--very-high-color); }
+        .badge-high { background-color: var(--high-color); }
+        .badge-low { background-color: var(--low-color); }
+        .badge-vlow { background-color: var(--very-low-color); }
+
+        .btn-reset {
+            display: block;
+            width: 200px;
+            margin: 20px auto 0;
+            background-color: #64748b;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14.5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-reset:hover { background-color: #475569; }
+    </style>
+
+    <!-- Khối PWA cấu hình kế thừa đồng bộ từ bản V8 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0d47a1">
+    <meta name="apple-mobile-web-app-title" content="Sàng lọc ICU">
+    <link rel="apple-touch-icon" href="download.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js').catch(err => console.log(err));
+            });
+        }
+    </script>
+</head>
+<body>
+
+<div class="backdrop-background"></div>
+<div class="backdrop-overlay"></div>
+
+<div class="container">
+    <div class="brand-header">
+        <div class="hospital-name">Bệnh viện Lão khoa Trung ương</div>
+        <h1>Pre ICU Triage Tool</h1>
+        <div class="subtitle">Công cụ hỗ trợ quyết định lâm sàng cho các đơn vị hồi sức tích cực hạn chế nguồn lực</div>
+    </div>
+
+    <div id="triage-form">
+        <!-- BƯỚC 1: TIÊU CHUẨN LOẠI TRỪ -->
+        <div class="triage-section">
+            <div class="section-title title-exclusion">1. TIÊU CHUẨN LOẠI TRỪ (Exclusion Criteria)</div>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ex1">
+                    <span>1. Người bệnh hoặc người đại diện hợp pháp từ chối nhập viện hồi sức tích cực (ICU).</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ex2">
+                    <span>2. Sa sút trí tuệ nghiêm trọng hoặc suy giảm nhận thức vĩnh viễn mức độ nặng (phụ thuộc hoàn toàn vào người khác trong mọi hoạt động sinh hoạt hàng ngày).</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ex3">
+                    <span>3. Tổn thương não không thể phục hồi (ví dụ: xuất huyết nội sọ mức độ nặng, chấn thương sọ não do thiếu máu cục bộ nghiêm trọng).</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ex4">
+                    <span>4. Bệnh lý ác tính di căn giai đoạn tiến triển hoặc ung thư máu có tiên lượng xấu (thời gian sống dự kiến dưới 3 - 6 tháng).</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ex5">
+                    <span>5. Chấn thương hoặc bỏng mức độ nghiêm trọng (tỷ lệ tử vong dự báo trên 80 - 90%).</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- BƯỚC 2: TIÊU CHUẨN LỰA CHỌN -->
+        <div class="triage-section">
+            <div class="section-title title-inclusion">2. TIÊU CHUẨN LỰA CHỌN (Inclusion Criteria)</div>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="in1">
+                    <span>1. Yêu cầu hỗ trợ thông khí xâm nhập: Suy hô hấp giảm oxy máu trơ ($SaO_2 \le 90\%$ khi thở $FiO_2 \ge 60\%$) HOẶC toan hô hấp ($pH < 7.25$) HOẶC có bằng chứng lâm sàng của suy hô hấp HOẶC mất khả năng bảo vệ/duy trì đường thở.</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="in2">
+                    <span>2. Yêu cầu sử dụng thuốc vận mạch/tăng co bóp cơ tim không thể quản lý ngoài ICU: Huyết áp tâm thu $SBP < 90$ mmHg đi kèm bằng chứng lâm sàng của sốc (thay đổi ý thức, giảm thiểu niệu, toan chuyển hóa nặng, tăng lactate máu hoặc các dấu hiệu suy cơ quan đích khác).</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- BƯỚC 3: CÁC THANG ĐIỂM PHÂN CẤP ƯU TIÊN -->
+        <div class="triage-section">
+            <div class="section-title title-prioritise">3. THÔNG SỐ PHÂN CẤP ƯU TIÊN (Prioritisation Parameters)</div>
+            
+            <div class="select-group">
+                <div class="select-box">
+                    <label for="pfs_score">Thang điểm CFS (Clinical Frailty Scale):</label>
+                    <select id="pfs_score">
+                        <option value="4">CFS ≤ 4: Rất khỏe mạnh đến Dễ bị tổn thương nhẹ</option>
+                        <option value="5">CFS 5: Hội chứng dễ bị tổn thương mức độ nhẹ</option>
+                        <option value="6">CFS 6-7: Hội chứng dễ bị tổn thương vừa đến nghiêm trọng</option>
+                        <option value="8">CFS 8-9: Hội chứng dễ bị tổn thương rất nghiêm trọng hoặc Giai đoạn cuối cuộc đời</option>
+                    </select>
+                </div>
+                
+                <div class="select-box">
+                    <label for="asa_score">Thang điểm đánh giá trạng thái thể chất ASA:</label>
+                    <select id="asa_score">
+                        <option value="1">ASA I hoặc II: Bệnh nhân khỏe mạnh hoặc mắc bệnh nhẹ</option>
+                        <option value="2">ASA II: Mắc bệnh mạn tính mức độ nhẹ</option>
+                        <option value="3">ASA III: Mắc bệnh toàn thân mức độ nặng, giới hạn hoạt động</option>
+                        <option value="4">ASA ≥ IV: Bệnh toàn thân nặng đe dọa tính mạng liên tục</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="select-group">
+                <div class="select-box">
+                    <label for="organ_failure">Số lượng cơ quan suy (Organ Failures):</label>
+                    <select id="organ_failure">
+                        <option value="1">1 cơ quan suy (1 Organ Failure)</option>
+                        <option value="2">2 - 3 cơ quan suy (2-3 Organ Failures)</option>
+                        <option value="3">≥ 4 cơ quan suy (≥ 4 Organ Failures)</option>
+                        <option value="4">Suy cơ quan lớn không thể phục hồi (Irreversible major organ failure)</option>
+                    </select>
+                </div>
+
+                <div class="select-box">
+                    <label for="survival_rate">Khả năng sống sót dự báo (Predicted Survival):</label>
+                    <select id="survival_rate">
+                        <option value="1">Khả năng rất cao (Highly Likely) ≥ 80%</option>
+                        <option value="2">Khả năng cao (Likely) ≥ 50%</option>
+                        <option value="3">Khả năng thấp (Unlikely) < 50%</option>
+                        <option value="4">Khả năng rất thấp (Very Unlikely) < 20%</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-action" onclick="evaluateTriage()">⚡ PHÂN LOẠI ĐIỀU PHỐI ICU</button>
+    </div>
+
+    <!-- KHUNG ĐƯA RA KẾT QUẢ SÀNG LỌC LÂM SÀNG -->
+    <div id="result-card">
+        <div class="result-status-badge" id="badge-status">Trạng thái</div>
+        <h2 class="result-text-main" id="text-main">Kết quả phân cấp</h2>
+        
+        <div class="result-block">
+            <h4>📋 Nhận định Lâm sàng</h4>
+            <p id="result-description"></p>
+        </div>
+
+        <div class="result-block" id="note-block" style="background-color: #f8fafc;">
+            <h4>⚖️ Tiêu chí mở rộng cân nhắc (Plus)</h4>
+            <p>1. Người bệnh được dự báo có mức độ sử dụng nguồn lực thấp hoặc đồng ý tham gia <strong>"thử nghiệm giới hạn thời gian" (time limited trial)</strong> nhằm giảm bớt sự tiêu thụ nguồn lực chung, có thể đạt đủ mức ưu tiên nhập viện dù tỷ lệ sống sót dự kiến thấp hơn ban đầu.<br>
+            2. Là một xem xét thứ yếu, trong trường hợp các bệnh nhân có cùng mức độ ưu tiên cần phân định (priority tie-breaking), chỉ số <strong>số năm sống có triển vọng phục hồi (life-years gained)</strong> có thể được đưa vào xem xét để thiết lập mức độ ưu tiên nhập viện hồi sức tích cực.</p>
+        </div>
+
+        <button class="btn-reset" onclick="resetTriage()">🔄 Đánh giá bệnh nhân mới</button>
+    </div>
+</div>
+
+<script>
+    function evaluateTriage() {
+        // Kiểm tra Tiêu chuẩn loại trừ
+        const isExcluded = document.getElementById('ex1').checked || 
+                           document.getElementById('ex2').checked || 
+                           document.getElementById('ex3').checked || 
+                           document.getElementById('ex4').checked || 
+                           document.getElementById('ex5').checked;
+
+        // Kiểm tra Tiêu chuẩn lựa chọn
+        const hasInclusion = document.getElementById('in1').checked || 
+                             document.getElementById('in2').checked;
+
+        const resultCard = document.getElementById('result-card');
+        const badgeStatus = document.getElementById('badge-status');
+        const textMain = document.getElementById('text-main');
+        const resDescription = document.getElementById('result-description');
+        
+        document.getElementById('triage-form').style.display = 'none';
+        resultCard.style.display = 'block';
+
+        // 1. Nếu có tiêu chuẩn loại trừ -> TỪ CHỐI NHẬP ICU KHÔNG CẦN XÉT TIẾP
+        if (isExcluded) {
+            resultCard.className = 'res-exclusion';
+            badgeStatus.className = 'result-status-badge badge-exclusion';
+            badgeStatus.innerText = 'KHÔNG ĐỦ TIÊU CHUẨN NHẬP';
+            textMain.innerText = 'Bệnh nhân có tiêu chuẩn loại trừ (Exclusion Criteria)';
+            resDescription.innerText = 'Bệnh nhân đáp ứng ít nhất một trong các tiêu chuẩn loại trừ lâm sàng nặng hoặc người nhà từ chối can thiệp hồi sức. Việc điều trị tại giường hoặc chuyển hướng sang chăm sóc giảm nhẹ được ưu tiên lựa chọn thay vì nhập ICU xâm lấn.';
+            return;
+        }
+
+        // 2. Nếu KHÔNG có tiêu chuẩn lựa chọn -> KHÔNG CÓ CHỈ ĐỊNH NHẬP ICU
+        if (!hasInclusion) {
+            resultCard.className = 'res-no-inclusion';
+            badgeStatus.className = 'result-status-badge badge-no-inclusion';
+            badgeStatus.innerText = 'THEO DÕI THÊM';
+            textMain.innerText = 'Không đáp ứng tiêu chuẩn lựa chọn (Inclusion Criteria)';
+            resDescription.innerText = 'Bệnh nhân hiện tại chưa có chỉ định hỗ trợ thông khí xâm nhập hoặc sử dụng vận mạch cường độ cao không thể quản lý ngoài ICU. Cần duy trì theo dõi sát sao tại khoa lâm sàng cấp cứu ban đầu.';
+            return;
+        }
+
+        // 3. Đánh giá phân cấp ưu tiên dựa trên các thông số thuật toán ma trận
+        const cfs = parseInt(document.getElementById('pfs_score').value);
+        const asa = parseInt(document.getElementById('asa_score').value);
+        const organ = parseInt(document.getElementById('organ_failure').value);
+        const survival = parseInt(document.getElementById('survival_rate').value);
+
+        // Đếm trọng số phân tích ưu tiên dựa trên mức độ nặng nhất của các tham số
+        const maxLevel = Math.max(cfs, asa, organ, survival);
+
+        if (maxLevel === 1) {
+            // Mức độ 1: Rất ưu tiên
+            resultCard.className = 'res-prio-very-high';
+            badgeStatus.className = 'result-status-badge badge-vhigh';
+            badgeStatus.innerText = 'ƯU TIÊN RẤT CAO (Very High Priority)';
+            textMain.innerText = 'Chỉ định nhập ICU khẩn cấp';
+            resDescription.innerText = 'Người bệnh có thang điểm CFS ≤ 4 (hoạt động thể chất tốt), trạng thái thể chất ổn định (ASA I/II), chỉ tổn thương đơn cơ quan và tiên lượng sống sót sau hồi sức rất cao (≥ 80%). Đáp ứng tối ưu và đạt lợi ích cao nhất từ các can thiệp hồi sức tích cực cường độ cao.';
+        } else if (maxLevel === 2) {
+            // Mức độ 2: Ưu tiên cao
+            resultCard.className = 'res-prio-high';
+            badgeStatus.className = 'result-status-badge badge-high';
+            badgeStatus.innerText = 'ƯU TIÊN CAO (High Priority)';
+            textMain.innerText = 'Chỉ định nhập ICU nhóm 2';
+            resDescription.innerText = 'Bệnh nhân có hội chứng dễ bị tổn thương mức độ nhẹ (CFS 5), ASA mức II, suy từ 2-3 cơ quan, hoặc tỷ lệ sống sót dự báo ổn định (≥ 50%). Cần sắp xếp giường hồi sức sớm do nguy cơ diễn tiến nặng cao.';
+        } else if (maxLevel === 3) {
+            // Mức độ 3: Ưu tiên thấp
+            resultCard.className = 'res-prio-low';
+            badgeStatus.className = 'result-status-badge badge-low';
+            badgeStatus.innerText = 'ƯU TIÊN THẤP (Low Priority)';
+            textMain.innerText = 'Cân nhắc nhập ICU dựa trên nguồn lực';
+            resDescription.innerText = 'Người bệnh thuộc nhóm suy nhược vừa đến nặng (CFS 6-7), trạng thái thể chất kém (ASA III), suy đa cơ quan (≥ 4 cơ quan), hoặc dự báo tỷ lệ sống sót thấp (< 50%). Việc nhập ICU cần cân đối kỹ lượng giường trống hiện có hoặc áp dụng thử nghiệm giới hạn thời gian can thiệp.';
+        } else {
+            // Mức độ 4: Ưu tiên rất thấp
+            resultCard.className = 'res-prio-very-low';
+            badgeStatus.className = 'result-status-badge badge-vlow';
+            badgeStatus.innerText = 'ƯU TIÊN RẤT THẤP (Very Low Priority)';
+            textMain.innerText = 'Hạn chế can thiệp xâm lấn';
+            resDescription.innerText = 'Người bệnh suy nhược rất nghiêm trọng/giai đoạn cuối (CFS 8-9), ASA ≥ IV, suy cơ quan lớn không thể đảo ngược, hoặc tiên lượng sống sót cực kỳ thấp (< 20%). Các biện pháp hồi sức cường độ cao có thể mang lại gánh nặng lớn hơn lợi ích thực tế. Nên cân nhắc chuyển hướng sang chăm sóc giảm nhẹ.';
+        }
+    }
+
+    function resetTriage() {
+        document.getElementById('ex1').checked = false;
+        document.getElementById('ex2').checked = false;
+        document.getElementById('ex3').checked = false;
+        document.getElementById('ex4').checked = false;
+        document.getElementById('ex5').checked = false;
+        document.getElementById('in1').checked = false;
+        document.getElementById('in2').checked = false;
+        
+        document.getElementById('pfs_score').value = "4";
+        document.getElementById('asa_score').value = "1";
+        document.getElementById('organ_failure').value = "1";
+        document.getElementById('survival_rate').value = "1";
+
+        document.getElementById('triage-form').style.display = 'block';
+        document.getElementById('result-card').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
