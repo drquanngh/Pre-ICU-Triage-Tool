@@ -29,6 +29,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
             background-color: #f0f4f8;
         }
 
@@ -182,7 +183,6 @@
             outline: none;
         }
 
-        /* Nút mở hộp thoại CFS */
         .btn-link-cfs {
             background-color: #e0f2fe;
             color: #0369a1;
@@ -203,7 +203,6 @@
             color: white;
         }
 
-        /* Khung thông báo nhỏ hiển thị điểm số CFS đã chấm */
         .cfs-alert-badge {
             display: none;
             margin-top: 6px;
@@ -231,7 +230,7 @@
             text-align: center;
         }
 
-        /* Cấu trúc thiết kế Modal Popup CFS */
+        /* Modal Popup CFS */
         .modal-cfs {
             display: none;
             position: fixed;
@@ -270,7 +269,6 @@
             font-weight: bold;
         }
 
-        /* Style phân cấp các câu hỏi CFS */
         .cfs-step { display: none; }
         .cfs-step.active { display: block; }
         .cfs-option-btn {
@@ -293,7 +291,7 @@
             transform: translateX(4px);
         }
 
-        /* Giao diện kết quả đầu ra */
+        /* Màn hình kết quả đầu ra */
         #result-card {
             display: none;
             margin-top: 25px;
@@ -475,12 +473,17 @@
         <h2 class="result-text-main" id="text-main">Kết quả phân cấp</h2>
         
         <div class="result-block">
-            <h4>📋 Nhận định Lâm sàng</h4>
-            <p id="result-description"></p>
+            <h4>📋 Nhận định Lâm sàng Thực tế của Bệnh nhân</h4>
+            <p id="result-description" style="font-weight: 500; color: #1e293b;"></p>
+        </div>
+
+        <div class="result-block" style="background-color: #f0fdfa; border-left: 4px solid #0d47a1;">
+            <h4>🩺 Khuyến cáo Định hướng Điều trị chuyên sâu (Theo VIP Study & Eldicus Guidelines)</h4>
+            <p id="clinical-recommendation" style="color: #0f172a;"></p>
         </div>
 
         <div class="result-block" style="background-color: #f8fafc; font-size: 13.5px; color: #475569;">
-            <h4>⚖️ Tiêu chí mở rộng cân nhắc (Plus)</h4>
+            <h4>⚖️ Tiêu chí mở rộng cân nhắc quản lý nguồn lực (Plus)</h4>
             1. Người bệnh được dự báo có mức độ sử dụng nguồn lực thấp hoặc đồng ý tham gia "thử nghiệm giới hạn thời gian" (time limited trial) nhằm giảm bớt sự tiêu thụ nguồn lực chung, có thể đạt đủ mức ưu tiên nhập viện dù tỷ lệ sống sót dự kiến thấp hơn ban đầu.<br>
             2. Là một xem xét thứ yếu, trong trường hợp các bệnh nhân có cùng mức độ ưu tiên cần phân định, chỉ số số năm sống có triển vọng phục hồi (life-years gained) có thể được xem xét để thiết lập mức độ ưu tiên nhập viện.
         </div>
@@ -601,23 +604,16 @@
         document.getElementById(currentCfsId).classList.add('active');
     }
 
-    // SỬA LỖI KHÔNG HIỂN THỊ ĐÚNG KẾT QUẢ: Khớp chính xác giá trị value với cấu trúc ma trận ICU ngầm
     function submitCfsResult(score, textDescription) {
         const selectElement = document.getElementById('pfs_score');
         const alertElement = document.getElementById('cfs-alert');
         
-        if (score <= 4) {
-            selectElement.value = "4";
-        } else if (score === 5) {
-            selectElement.value = "5";
-        } else if (score === 6 || score === 7) {
-            selectElement.value = "6";
-        } else if (score === 8 || score === 9) {
-            selectElement.value = "8";
-        }
+        if (score <= 4) selectElement.value = "4";
+        else if (score === 5) selectElement.value = "5";
+        else if (score === 6 || score === 7) selectElement.value = "6";
+        else if (score === 8 || score === 9) selectElement.value = "8";
         
-        // Hiển thị nhãn thông báo trực quan điểm số thực tế vừa chấm
-        alertElement.innerText = "✓ Đã chấm điểm tự động: " + textDescription;
+        alertElement.innerText = "✓ Hệ thống ghi nhận điểm tự động: " + textDescription;
         alertElement.style.display = "block";
         
         closeCFSModal();
@@ -629,7 +625,7 @@
         document.getElementById(currentCfsId).classList.add('active');
     }
 
-    // Logic thuật toán ma trận phân loại ICU
+    // KHẮC PHỤC LỖI MÂU THUẪN DỮ LIỆU BẰNG CƠ CHẾ SINH VĂN BẢN ĐỘNG (DYNAMIC TEXT)
     function evaluateTriage() {
         const isExcluded = document.getElementById('ex1').checked || 
                            document.getElementById('ex2').checked || 
@@ -644,6 +640,7 @@
         const badgeStatus = document.getElementById('badge-status');
         const textMain = document.getElementById('text-main');
         const resDescription = document.getElementById('result-description');
+        const recText = document.getElementById('clinical-recommendation');
         
         document.getElementById('triage-form').style.display = 'none';
         resultCard.style.display = 'block';
@@ -653,7 +650,8 @@
             badgeStatus.className = 'result-status-badge badge-exclusion';
             badgeStatus.innerText = 'KHÔNG ĐỦ TIÊU CHUẨN NHẬP';
             textMain.innerText = 'Bệnh nhân có tiêu chuẩn loại trừ (Exclusion Criteria)';
-            resDescription.innerText = 'Bệnh nhân đáp ứng ít nhất một trong các tiêu chuẩn loại trừ lâm sàng nặng hoặc người nhà từ chối can thiệp hồi sức. Ưu tiên các biện pháp điều trị triệu chứng tối ưu tại giường hoặc chăm sóc giảm nhẹ thay vì can thiệp hồi sức xâm lấn tại ICU.';
+            resDescription.innerText = 'Người bệnh đáp ứng ít nhất một trong các tiêu chuẩn loại trừ lâm sàng nặng hoặc người nhà từ chối can thiệp hồi sức. Việc điều trị tích cực duy trì hoặc chuyển hướng sang chăm sóc giảm nhẹ triệu chứng tại giường được ưu tiên lựa chọn thay vì nhập ICU xâm lấn.';
+            recText.innerText = 'Không có chỉ định điều trị hồi sức tích cực. Nên tập trung tối ưu hóa chất lượng sống, kiểm soát đau và triệu chứng đau đớn cho người bệnh tại khoa phòng gốc.';
             return;
         }
 
@@ -662,42 +660,64 @@
             badgeStatus.className = 'result-status-badge badge-no-inclusion';
             badgeStatus.innerText = 'THEO DÕI THÊM';
             textMain.innerText = 'Không đáp ứng tiêu chuẩn lựa chọn (Inclusion Criteria)';
-            resDescription.innerText = 'Người bệnh hiện tại chưa có các chỉ định bắt buộc hồi sức như thông khí xâm nhập hoặc sử dụng vận mạch/tăng co bóp cơ tim không thể quản lý ngoài ICU. Duy trì theo dõi sát mạch, huyết áp, hô hấp tại khoa lâm sàng gốc.';
+            resDescription.innerText = 'Bệnh nhân hiện tại chưa có các chỉ định can thiệp bắt buộc hồi sức như thông khí xâm nhập hoặc sử dụng vận mạch/tăng co bóp cơ tim không thể quản lý ngoài ICU. Duy trì theo dõi sát hô hấp và tuần hoàn tại khoa lâm sàng ban đầu.';
+            recText.innerText = 'Tiếp tục theo dõi các dấu hiệu sinh tồn tại giường phòng cấp cứu hoặc khoa phòng thường. Sẵn sàng đánh giá lại tiêu chuẩn lựa chọn nhập ICU nếu thể trạng người bệnh có dấu hiệu chuyển biến suy sụp cấp tính đột ngột.';
             return;
         }
 
-        const cfs = parseInt(document.getElementById('pfs_score').value);
-        const asa = parseInt(document.getElementById('asa_score').value);
-        const organ = parseInt(document.getElementById('organ_failure').value);
-        const survival = parseInt(document.getElementById('survival_rate').value);
+        // Đọc giá trị text thực tế để dán động vào câu nhận định, tránh mâu thuẫn
+        const cfsSelect = document.getElementById('pfs_score');
+        const cfsText = cfsSelect.options[cfsSelect.selectedIndex].text;
+        
+        const asaSelect = document.getElementById('asa_score');
+        const asaText = asaSelect.options[asaSelect.selectedIndex].text;
 
-        // Thuật toán ma trận tính trọng số dựa trên thông số nặng nhất
+        const organSelect = document.getElementById('organ_failure');
+        const organText = organSelect.options[organSelect.selectedIndex].text;
+
+        const survivalSelect = document.getElementById('survival_rate');
+        const survivalText = survivalSelect.options[survivalSelect.selectedIndex].text;
+
+        const cfs = parseInt(cfsSelect.value);
+        const asa = parseInt(asaSelect.value);
+        const organ = parseInt(organSelect.value);
+        const survival = parseInt(survivalSelect.value);
+
+        // Sinh dynamic text kết xuất thông tin đồng bộ 100% với các thông số đã lựa chọn
+        resDescription.innerHTML = `Bệnh nhân được ghi nhận trạng thái lâm sàng bao gồm:<br>` +
+                                   `• Mức độ suy nhược cơ địa: <strong>${cfsText}</strong><br>` +
+                                   `• Trạng thái thể chất nền: <strong>${asaText}</strong><br>` +
+                                   `• Tổn thương suy đa tạng: <strong>${organText}</strong><br>` +
+                                   `• Khả năng sống sót dự báo sau can thiệp: <strong>${survivalText}</strong>.`;
+
+        // Thuật toán ma trận tính trọng số phân cấp ưu tiên theo chỉ số nặng nhất
         const maxLevel = Math.max(cfs, asa, organ, survival);
 
-        if (maxLevel === 1 || maxLevel === 4) {
+        // Nạp khuyến cáo quản lý y tế dựa trên tài liệu Lessons from the ICU (VIP & Eldicus Studies)
+        if (maxLevel === 4) {
             resultCard.className = 'res-prio-very-high';
             badgeStatus.className = 'result-status-badge badge-vhigh';
             badgeStatus.innerText = 'ƯU TIÊN RẤT CAO (Very High Priority)';
             textMain.innerText = 'Chỉ định nhập ICU khẩn cấp';
-            resDescription.innerText = 'Người bệnh có thể trạng từ rất khỏe mạnh đến dễ bị tổn thương rất nhẹ (CFS ≤ 4), không có bệnh lý mạn tính đe dọa tính mạng (ASA I/II), chỉ suy 1 cơ quan đơn độc và khả năng sống sót dự đoán sau hồi sức rất cao (≥ 80%). Đạt lợi ích tối đa khi can thiệp điều trị.';
+            recText.innerText = 'Bệnh nhân có dự trữ sinh lý tốt, mức độ suy tạng tối thiểu và tiên lượng sống sót cao sau hồi sức. Đạt hiệu quả lợi ích điều trị tối ưu nhất khi can thiệp điều trị hồi sức tích cực cường độ cao ngay lập tức.';
         } else if (maxLevel === 5) {
             resultCard.className = 'res-prio-high';
             badgeStatus.className = 'result-status-badge badge-high';
             badgeStatus.innerText = 'ƯU TIÊN CAO (High Priority)';
             textMain.innerText = 'Chỉ định nhập ICU nhóm 2';
-            resDescription.innerText = 'Bệnh nhân suy nhược nhẹ (CFS 5), trạng thái thể chất mức độ trung bình (ASA II), suy từ 2-3 cơ quan hoặc khả năng sống sót dự báo ổn định (≥ 50%). Cần sắp xếp giường điều trị sớm để tránh nguy cơ diễn tiến suy sụp suy đa tạng.';
+            recText.innerText = 'Bệnh nhân có biểu hiện suy nhược nhẹ hoặc suy tạng mức độ vừa. Khuyến cáo sắp xếp giường hồi sức sớm và theo dõi sát sao tiến trình điều trị để ngăn ngừa biến chứng tổn thương đa tạng mất bù cấp tính.';
         } else if (maxLevel === 6) {
             resultCard.className = 'res-prio-low';
             badgeStatus.className = 'result-status-badge badge-low';
             badgeStatus.innerText = 'ƯU TIÊN THẤP (Low Priority)';
-            textMain.innerText = 'Cân nhắc nhập ICU dựa trên nguồn lực giường bệnh thực tế';
-            resDescription.innerText = 'Người bệnh thuộc nhóm suy nhược vừa đến nghiêm trọng (CFS 6-7), trạng thái thể chất kém (ASA III), suy đa cơ quan (≥ 4 cơ quan) hoặc dự báo tỷ lệ sống sót thấp (< 50%). Việc quyết định nhập ICU cần cân đối kỹ lượng giường trống lâm sàng hoặc áp dụng thử nghiệm giới hạn thời gian can thiệp.';
+            textMain.innerText = 'Cân nhắc nhập ICU dựa trên nguồn lực giường bệnh trống thực tế';
+            recText.innerText = 'Người bệnh thuộc nhóm cơ địa suy nhược từ vừa đến nặng hoặc suy đa tạng phức tạp. Trong điều kiện nguồn lực ICU hạn chế, khuyến cáo áp dụng giải pháp "Thử nghiệm hồi sức giới hạn thời gian" (Time-limited ICU trial). Nếu sau một khoảng thời gian quy định không đáp ứng lâm sàng, cần xem xét rút lui can thiệp xâm lấn.';
         } else {
             resultCard.className = 'res-prio-very-low';
             badgeStatus.className = 'result-status-badge badge-vlow';
             badgeStatus.innerText = 'ƯU TIÊN RẤT THẤP (Very Low Priority)';
-            textMain.innerText = 'Hạn chế can thiệp xâm lấn cường độ cao';
-            resDescription.innerText = 'Người bệnh suy nhược rất nghiêm trọng hoặc ở giai đoạn cuối cuộc đời (CFS 8-9), tình trạng thể chất mất bù nguy kịch (ASA ≥ IV), hoặc có suy cơ quan lớn không thể đảo ngược, tiên lượng sống sót cực kỳ thấp (< 20%). Nên ưu tiên tối ưu hóa chất lượng sống và chăm sóc giảm nhẹ.';
+            textMain.innerText = 'Hạn chế can thiệp xâm lấn kéo dài không mang lại lợi ích';
+            recText.innerText = 'Cơ địa bệnh nhân suy nhược rất nghiêm trọng/giai đoạn cuối, tổn thương tạng không thể đảo ngược hoặc tỷ lệ sống sót cực kỳ thấp. Can thiệp ICU cường độ cao kéo dài thường mang lại gánh nặng đau đớn nhiều hơn lợi ích thực tế. Khuyến cáo phối hợp chặt chẽ với chuyên khoa lão khoa để thiết lập kế hoạch chăm sóc giảm nhẹ.';
         }
     }
 
